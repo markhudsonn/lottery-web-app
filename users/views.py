@@ -15,6 +15,7 @@ def register():
     # create signup form object
     form = RegisterForm()
 
+    validation_message = ""
     # if request method is POST or form is valid
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
@@ -40,7 +41,7 @@ def register():
         # sends user to login page
         return redirect(url_for('users.login'))
     # if request method is GET or form not valid re-render signup page
-    return render_template('users/register.html', form=form)
+    return render_template('users/register.html', form=form, validation_message=validation_message)
 
 
 # view user login
