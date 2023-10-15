@@ -16,7 +16,7 @@ def admin():
 
 
 # create a new winning draw
-@admin_blueprint.route('/generate_winning_draw', methods=['POST'])
+@admin_blueprint.route('/generate_winning_draw')
 def generate_winning_draw():
 
     # get current winning draw
@@ -53,7 +53,7 @@ def generate_winning_draw():
 
 
 # view current winning draw
-@admin_blueprint.route('/view_winning_draw', methods=['POST'])
+@admin_blueprint.route('/view_winning_draw')
 def view_winning_draw():
 
     # get winning draw from DB
@@ -70,7 +70,7 @@ def view_winning_draw():
 
 
 # view lottery results and winners
-@admin_blueprint.route('/run_lottery', methods=['POST'])
+@admin_blueprint.route('/run_lottery')
 def run_lottery():
 
     # get current unplayed winning draw
@@ -132,7 +132,7 @@ def run_lottery():
 
 
 # view all registered users
-@admin_blueprint.route('/view_all_users', methods=['POST'])
+@admin_blueprint.route('/view_all_users')
 def view_all_users():
     current_users = User.query.filter_by(role='user').all()
 
@@ -140,7 +140,7 @@ def view_all_users():
 
 
 # view last 10 log entries
-@admin_blueprint.route('/logs', methods=['POST'])
+@admin_blueprint.route('/logs')
 def logs():
     with open("lottery.log", "r") as f:
         content = f.read().splitlines()[-10:]

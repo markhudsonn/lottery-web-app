@@ -49,12 +49,6 @@ def login():
     return render_template('users/login.html')
 
 
-# view user profile
-@users_blueprint.route('/profile')
-def profile():
-    return render_template('users/profile.html', name="PLACEHOLDER FOR FIRSTNAME")
-
-
 # view user account
 @users_blueprint.route('/account')
 def account():
