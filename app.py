@@ -24,12 +24,14 @@ def index():
 from users.views import users_blueprint
 from admin.views import admin_blueprint
 from lottery.views import lottery_blueprint
+from errors.views import errors_blueprint
+
 #
 # # register blueprints with app
 app.register_blueprint(users_blueprint)
 app.register_blueprint(admin_blueprint)
 app.register_blueprint(lottery_blueprint)
-
+app.register_blueprint(errors_blueprint)
 
 if __name__ == "__main__":
     app.run()
