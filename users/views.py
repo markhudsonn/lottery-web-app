@@ -1,5 +1,6 @@
 # IMPORTS
-from flask import Blueprint, render_template, flash, redirect, url_for
+from flask import Blueprint, render_template, flash, redirect, url_for, session
+
 from app import db
 from models import User
 from users.forms import RegisterForm
@@ -38,10 +39,30 @@ def register():
         db.session.add(new_user)
         db.session.commit()
 
-        # sends user to login page
-        return redirect(url_for('users.login'))
+        # add user to session
+        session['username'] = form.email.data
+
+        # sends user to setup 2fa page
+        return redirect(url_for('users.setup_2fa'))
     # if request method is GET or form not valid re-render signup page
     return render_template('users/register.html', form=form, validation_message=validation_message)
+
+
+# view 2fa setup
+@users_blueprint.route('/setup_2fa', methods=['GET', 'POST'])
+def setup_2fa():
+    if 'username' not in session:
+        return redirect(url_for('main.index'))
+
+    user = User.query.filter_by(email=session['username']).first()
+
+    if not user:
+        return redirect(url_for('main.index'))
+
+    del session['username']
+
+    return render_template('users/setup_2fa.html', user=user.email, uri=user.get_2fa_uri()), 200, {
+        'Cache-Control': 'no-cache, no-store, must-revalidate', 'Pragma': 'no-cache', 'Expires': '0'}
 
 
 # view user login
