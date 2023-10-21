@@ -1,5 +1,7 @@
-from app import db, app
+import pyotp
 from flask_login import UserMixin
+
+from app import db, app
 
 
 class User(db.Model, UserMixin):
@@ -16,6 +18,7 @@ class User(db.Model, UserMixin):
     lastname = db.Column(db.String(100), nullable=False)
     phone = db.Column(db.String(100), nullable=False)
     role = db.Column(db.String(100), nullable=False, default='user')
+    pin_key = db.Column(db.String(32), nullable=True, default=pyotp.random_base32())
 
     # Define the relationship to Draw
     draws = db.relationship('Draw')
@@ -27,6 +30,12 @@ class User(db.Model, UserMixin):
         self.phone = phone
         self.password = password
         self.role = role
+
+    def get_2fa_uri(self):
+        return str(pyotp.totp.TOTP(self.pin_key).provisioning_uri(name=self.email, issuer_name='Lottery App'))
+
+    def verify_pin(self, pin):
+        return pyotp.TOTP(self.pin_key).verify(pin)
 
 
 class Draw(db.Model):
