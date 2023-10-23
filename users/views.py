@@ -1,5 +1,7 @@
 # IMPORTS
 from flask import Blueprint, render_template, flash, redirect, url_for, session
+from flask_login import login_user
+from markupsafe import Markup
 
 from app import db
 from models import User
@@ -66,15 +68,53 @@ def setup_2fa():
 
 
 # view user login
-@users_blueprint.route('/login')
+@users_blueprint.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
     validation_message = ""
 
+    if not session.get('authentication_attempts'):
+        session['authentication_attempts'] = 0
+
+    if session['authentication_attempts'] >= 3:
+        flash(Markup('Too many authentication attempts. Please click <a href="/reset">here</a> to reset'), 'danger')
+        return render_template('users/login.html')
+
     if form.validate_on_submit():
+        username = User.query.filter_by(email=form.email.data).first()
+        password = form.password.data
+        pin = form.pin.data
+
+        if not username:
+            session['authentication_attempts'] += 1
+            validation_message = 'Username or password is incorrect'
+            return render_template('users/login.html', form=form, validation_message=validation_message)
+
+        if not User.verify_password(username, password):
+            session['authentication_attempts'] += 1
+            validation_message = 'Username or password is incorrect'
+            return render_template('users/login.html', form=form, validation_message=validation_message)
+
+        if not username.verify_pin(pin):
+            session['authentication_attempts'] += 1
+            validation_message = 'PIN is incorrect'
+            return render_template('users/login.html', form=form, validation_message=validation_message)
+
+        login_user(username)
+
         return redirect(url_for('users.account'))
 
+    attempts_remaining = 3 - session['authentication_attempts']
+    flash(f'You have {attempts_remaining} attempts remaining', 'info')
+
     return render_template('users/login.html', form=form, validation_message=validation_message)
+
+
+# reset authentication attempts
+@users_blueprint.route('/reset')
+def reset():
+    session['authentication_attempts'] = 0
+    return redirect(url_for('users.login'))
 
 
 # view user account

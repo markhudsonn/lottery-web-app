@@ -4,32 +4,46 @@
     <div class="column is-5 is-offset-4">
         <h3 class="title is-3">Login</h3>
         <div class="box">
-            <form method="post">
-                <div class="field">
-                    {{ form.csrf_token() }}
-                    <div class="control">
-                        {{ form.email(class="input", placeholder="Email") }}
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div class="notification is-danger">
+                        {{ messages[0] }}
                     </div>
-                </div>
-                <div class="field">
-                    <div class="control">
-                        {{ form.password(class="input", placeholder="Password") }}
+                {% endif %}
+            {% endwith %}
+            {% if form %}
+                <form method="post">
+                    <div class="field">
+                        {{ form.csrf_token() }}
+                        <div class="control">
+                            {{ form.email(class="input", placeholder="Email") }}
+                        </div>
                     </div>
-                </div>
-                <div class="field">
-                    <div class="control">
-                        {{ form.pin(class="input", placeholder="PIN") }}
+                    <div class="field">
+                        <div class="control">
+                            {{ form.password(class="input", placeholder="Password") }}
+                        </div>
                     </div>
-                </div>
-                <div class="field">
-                    {{ form.recaptcha }}
-                </div>
-                <div class="field">
-                    <div class="control">
-                        {{ form.submit(class="button is-info is-centered") }}
+                    <div class="field">
+                        <div class="control">
+                            {{ form.pin(class="input", placeholder="PIN") }}
+                        </div>
                     </div>
-                </div>
-            </form>
+                    <div class="field">
+                        {{ form.recaptcha }}
+                    </div>
+                    <div class="field">
+                        <div class="control">
+                            {{ form.submit(class="button is-info is-centered") }}
+                        </div>
+                    </div>
+                    {% if validation_message %}
+                        <div class="help is-danger">
+                            {{ validation_message }}
+                        </div>
+                    {% endif %}
+                </form>
+            {% endif %}
         </div>
     </div>
 {% endblock %}
