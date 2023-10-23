@@ -1,6 +1,6 @@
 # IMPORTS
 from flask import Blueprint, render_template, flash, redirect, url_for, session
-from flask_login import login_user
+from flask_login import login_user, current_user, logout_user
 from markupsafe import Markup
 
 from app import db
@@ -115,6 +115,14 @@ def login():
 def reset():
     session['authentication_attempts'] = 0
     return redirect(url_for('users.login'))
+
+
+# logout user
+@users_blueprint.route('/logout')
+def logout():
+    if current_user.is_authenticated:
+        logout_user()
+    return render_template('main/index.html')
 
 
 # view user account
