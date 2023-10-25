@@ -1,11 +1,11 @@
 # IMPORTS
 from flask import Blueprint, render_template, flash, redirect, url_for, session
-from flask_login import login_user, current_user, logout_user
+from flask_login import login_user, current_user, logout_user, login_required
 from markupsafe import Markup
 
 from app import db
 from models import User
-from users.forms import RegisterForm, LoginForm
+from users.forms import RegisterForm, LoginForm, ChangePasswordForm
 
 # CONFIG
 users_blueprint = Blueprint('users', __name__, template_folder='templates')
@@ -102,7 +102,10 @@ def login():
 
         login_user(username)
 
-        return redirect(url_for('users.account'))
+        if current_user.role == 'admin':
+            return redirect(url_for('admin.admin'))
+        else:
+            return redirect(url_for('users.account'))
 
     attempts_remaining = 3 - session['authentication_attempts']
     flash(f'You have {attempts_remaining} attempts remaining', 'info')
@@ -119,6 +122,7 @@ def reset():
 
 # logout user
 @users_blueprint.route('/logout')
+@login_required
 def logout():
     if current_user.is_authenticated:
         logout_user()
@@ -127,10 +131,35 @@ def logout():
 
 # view user account
 @users_blueprint.route('/account')
+@login_required
 def account():
     return render_template('users/account.html',
-                           acc_no="PLACEHOLDER FOR USER ID",
-                           email="PLACEHOLDER FOR USER EMAIL",
-                           firstname="PLACEHOLDER FOR USER FIRSTNAME",
-                           lastname="PLACEHOLDER FOR USER LASTNAME",
-                           phone="PLACEHOLDER FOR USER PHONE")
+                           acc_no=current_user.id,
+                           email=current_user.email,
+                           firstname=current_user.firstname,
+                           lastname=current_user.lastname,
+                           phone=current_user.phone)
+
+
+@users_blueprint.route('/change_password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    form = ChangePasswordForm()
+    validation_message = ""
+
+    if form.validate_on_submit():
+        if not current_user.verify_password(form.current_password.data):
+            flash('Current password is incorrect')
+            return render_template('users/change_password.html', form=form, validation_message=validation_message)
+
+        if not form.new_password.data == form.confirm_new_password.data:
+            flash('New passwords do not match')
+            return render_template('users/change_password.html', form=form, validation_message=validation_message)
+
+        current_user.password = form.new_password.data
+        db.session.commit()
+        flash('Password updated successfully', 'success')
+
+        return redirect(url_for('users.account'))
+
+    return render_template('users/change_password.html', form=form)
