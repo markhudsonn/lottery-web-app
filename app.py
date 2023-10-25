@@ -1,9 +1,10 @@
 # IMPORTS
 import os
+from functools import wraps
 
 from dotenv import load_dotenv
 from flask import Flask, render_template
-from flask_login import LoginManager
+from flask_login import LoginManager, current_user
 from flask_qrcode import QRcode
 from flask_sqlalchemy import SQLAlchemy
 
@@ -26,6 +27,20 @@ QRcode(app)
 @app.route('/')
 def index():
     return render_template('main/index.html')
+
+
+def requires_roles(*roles):
+    def wrapper(f):
+        @wraps(f)
+        def wrapped(*args, **kwargs):
+            if current_user.role not in roles:
+                return render_template('errors/403.html'), 403
+
+            return f(*args, **kwargs)
+
+        return wrapped
+
+    return wrapper
 
 
 # BLUEPRINTS

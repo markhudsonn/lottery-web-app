@@ -1,7 +1,10 @@
 # IMPORTS
 import random
+
 from flask import Blueprint, render_template, flash, redirect, url_for
+
 from app import db
+from app import requires_roles
 from models import User, Draw
 
 # CONFIG
@@ -11,14 +14,15 @@ admin_blueprint = Blueprint('admin', __name__, template_folder='templates')
 # VIEWS
 # view admin homepage
 @admin_blueprint.route('/admin')
+@requires_roles('admin')
 def admin():
     return render_template('admin/admin.html', name="PLACEHOLDER FOR FIRSTNAME")
 
 
 # create a new winning draw
 @admin_blueprint.route('/generate_winning_draw')
+@requires_roles('admin')
 def generate_winning_draw():
-
     # get current winning draw
     current_winning_draw = Draw.query.filter_by(master_draw=True).first()
     lottery_round = 1
@@ -54,10 +58,10 @@ def generate_winning_draw():
 
 # view current winning draw
 @admin_blueprint.route('/view_winning_draw')
+@requires_roles('admin')
 def view_winning_draw():
-
     # get winning draw from DB
-    current_winning_draw = Draw.query.filter_by(master_draw=True,been_played=False).first()
+    current_winning_draw = Draw.query.filter_by(master_draw=True, been_played=False).first()
 
     # if a winning draw exists
     if current_winning_draw:
@@ -71,8 +75,8 @@ def view_winning_draw():
 
 # view lottery results and winners
 @admin_blueprint.route('/run_lottery')
+@requires_roles('admin')
 def run_lottery():
-
     # get current unplayed winning draw
     current_winning_draw = Draw.query.filter_by(master_draw=True, been_played=False).first()
 
@@ -99,7 +103,6 @@ def run_lottery():
 
                 # if user draw matches current unplayed winning draw
                 if draw.numbers == current_winning_draw.numbers:
-
                     # add details of winner to list of results
                     results.append((current_winning_draw.lottery_round, draw.numbers, draw.user_id, user.email))
 
@@ -133,6 +136,7 @@ def run_lottery():
 
 # view all registered users
 @admin_blueprint.route('/view_all_users')
+@requires_roles('admin')
 def view_all_users():
     current_users = User.query.filter_by(role='user').all()
 
@@ -141,6 +145,7 @@ def view_all_users():
 
 # view last 10 log entries
 @admin_blueprint.route('/logs')
+@requires_roles('admin')
 def logs():
     with open("lottery.log", "r") as f:
         content = f.read().splitlines()[-10:]
