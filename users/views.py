@@ -99,7 +99,12 @@ def login():
 
         if not username.verify_pin(pin):
             session['authentication_attempts'] += 1
-            validation_message = 'PIN is incorrect'
+            validation_message = 'PIN or postcode is incorrect'
+            return render_template('users/login.html', form=form, validation_message=validation_message)
+
+        if not username.verify_postcode(form.postcode.data):
+            session['authentication_attempts'] += 1
+            validation_message = 'PIN or postcode is incorrect'
             return render_template('users/login.html', form=form, validation_message=validation_message)
 
         login_user(username)

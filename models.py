@@ -25,10 +25,12 @@ class User(db.Model, UserMixin):
     # Define the relationship to Draw
     draws = db.relationship('Draw')
 
-    def __init__(self, email, firstname, lastname, phone, password, role):
+    def __init__(self, email, firstname, lastname, date_of_birth, postcode, phone, password, role):
         self.email = email
         self.firstname = firstname
         self.lastname = lastname
+        self.date_of_birth = date_of_birth
+        self.postcode = postcode
         self.phone = phone
         self.password = password
         self.role = role
@@ -42,6 +44,9 @@ class User(db.Model, UserMixin):
     def verify_pin(self, pin):
         # return pyotp.TOTP(self.pin_key).verify(pin)
         return True
+
+    def verify_postcode(self, postcode):
+        return self.postcode == postcode
 
 
 class Draw(db.Model):
@@ -84,7 +89,9 @@ def init_db():
                      password='Admin1!',
                      firstname='Alice',
                      lastname='Jones',
-                     phone='0191-123-4567',
+                     date_of_birth='01/01/2000',
+                     postcode='NE1 7RU',
+                     phone='0191-208-6000',
                      role='admin')
 
         db.session.add(admin)
