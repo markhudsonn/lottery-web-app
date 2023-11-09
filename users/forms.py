@@ -9,6 +9,8 @@ class RegisterForm(FlaskForm):
     email = EmailField('Email', validators=[DataRequired(), Email()])
     firstname = StringField('First Name', validators=[DataRequired(), name_special_character_validation])
     lastname = StringField('Last Name', validators=[DataRequired(), name_special_character_validation])
+    date_of_birth = StringField('Date of Birth', validators=[DataRequired(), date_of_birth_validation])
+    postcode = StringField('Postcode', validators=[DataRequired(), postcode_validation])
     phone = StringField('Phone Number', validators=[DataRequired(), phone_number_validation])
     password = PasswordField('Password', validators=[DataRequired(), Length(min=6, max=12),
                                                      password_digit_validation,

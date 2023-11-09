@@ -33,6 +33,8 @@ def register():
         new_user = User(email=form.email.data,
                         firstname=form.firstname.data,
                         lastname=form.lastname.data,
+                        date_of_birth=form.date_of_birth.data,
+                        postcode=form.postcode.data,
                         phone=form.phone.data,
                         password=form.password.data,
                         role='user')
