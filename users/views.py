@@ -145,7 +145,10 @@ def account():
                            email=current_user.email,
                            firstname=current_user.firstname,
                            lastname=current_user.lastname,
-                           phone=current_user.phone)
+                           date_of_birth=current_user.date_of_birth,
+                           postcode=current_user.postcode,
+                           phone=current_user.phone,
+                           role=current_user.role)
 
 
 @users_blueprint.route('/change_password', methods=['GET', 'POST'])

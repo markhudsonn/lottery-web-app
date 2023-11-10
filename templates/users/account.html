@@ -25,9 +25,20 @@
                     <th>{{ lastname }}</th>
                 </tr>
                 <tr>
+                    <th>Date of Birth</th>
+                    <th>{{ date_of_birth }}</th>
+                </tr>
+                <tr>
+                    <th>Postcode</th>
+                    <th>{{ postcode }}</th>
+                </tr>
+                <tr>
                     <th>Phone No.</th>
                     <th>{{ phone }}</th>
                 </tr>
+                <tr>
+                    <th>Role</th>
+                    <th>{{ role }}</th>
                 <tr>
                     <td><a style='color: blue' href="{{ url_for('users.change_password') }}">Change Password</a></td>
                 </tr>
