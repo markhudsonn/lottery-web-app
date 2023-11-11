@@ -56,12 +56,12 @@ def register():
 @users_blueprint.route('/setup_2fa', methods=['GET', 'POST'])
 def setup_2fa():
     if 'username' not in session:
-        return redirect(url_for('main.index'))
+        return redirect(url_for('index'))
 
     user = User.query.filter_by(email=session['username']).first()
 
     if not user:
-        return redirect(url_for('main.index'))
+        return redirect(url_for('index'))
 
     del session['username']
 
