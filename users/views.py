@@ -112,7 +112,7 @@ def login():
         if current_user.role == 'admin':
             return redirect(url_for('admin.admin'))
         else:
-            return redirect(url_for('users.account'))
+            return redirect(url_for('lottery.lottery'))
 
     attempts_remaining = 3 - session['authentication_attempts']
     flash(f'You have {attempts_remaining} attempts remaining', 'info')
