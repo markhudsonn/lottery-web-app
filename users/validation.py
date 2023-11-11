@@ -44,6 +44,8 @@ def date_of_birth_validation(form, field):
     days_pattern = r'^(0?[1-9])|([12][0-9]|3[01])$'  # 01-31
     months_pattern = r'^(0?[1-9]|1[012])$'  # 01-12
     years_pattern = r'^(19|20)\d\d$'  # 19XX-20XX
+    if not re.search(r'^\d{2}/\d{2}/\d{4}$', field.data):
+        raise ValidationError("Date of birth must be in format: DD/MM/YYYY")
     if not re.search(days_pattern, field.data[0:2]):
         raise ValidationError("Date of birth must be in format: DD/MM/YYYY, DD must be between 01-31")
     if not re.search(months_pattern, field.data[3:5]):
