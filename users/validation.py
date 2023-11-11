@@ -17,7 +17,7 @@ def phone_number_validation(form, field):
 
 def password_digit_validation(form, field):
     """Checks password has at least 1 digit"""
-    if not re.search(r'(?=.*\d)', field.data):
+    if not re.search(r'\d', field.data):
         raise ValidationError("Password must contain at least 1 digit")
 
 
