@@ -59,7 +59,7 @@ app.register_blueprint(errors_blueprint)
 
 # initialise login manager
 login_manager = LoginManager()
-login_manager.login_view = 'users.views.login'
+login_manager.login_view = 'users.login'
 login_manager.init_app(app)
 
 from models import User
