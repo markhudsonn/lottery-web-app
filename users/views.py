@@ -166,8 +166,13 @@ def change_password():
             flash('New passwords do not match')
             return render_template('users/change_password.html', form=form, validation_message=validation_message)
 
+        if current_user.verify_password(form.new_password.data):
+            flash('New password cannot be the same as the current password')
+            return render_template('users/change_password.html', form=form, validation_message=validation_message)
+
         current_user.password = form.new_password.data
         db.session.commit()
+
         flash('Password updated successfully', 'success')
 
         return redirect(url_for('users.account'))
