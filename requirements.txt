@@ -9,3 +9,4 @@ flask-qrcode
 Flask-login
 python-dotenv
 MarkupSafe
+bcrypt

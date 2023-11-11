@@ -1,3 +1,4 @@
+import bcrypt
 import pyotp
 from flask_login import UserMixin
 
@@ -11,7 +12,8 @@ class User(db.Model, UserMixin):
 
     # User authentication information.
     email = db.Column(db.String(100), nullable=False, unique=True)
-    password = db.Column(db.String(100), nullable=False)
+    password = db.Column(db.BLOB, nullable=False)
+    pin_key = db.Column(db.String(32), nullable=True, default=pyotp.random_base32())
 
     # User information
     firstname = db.Column(db.String(100), nullable=False)
@@ -20,7 +22,6 @@ class User(db.Model, UserMixin):
     postcode = db.Column(db.String(100), nullable=False)
     phone = db.Column(db.String(100), nullable=False)
     role = db.Column(db.String(100), nullable=False, default='user')
-    pin_key = db.Column(db.String(32), nullable=True, default=pyotp.random_base32())
 
     # Define the relationship to Draw
     draws = db.relationship('Draw')
@@ -32,11 +33,11 @@ class User(db.Model, UserMixin):
         self.date_of_birth = date_of_birth
         self.postcode = postcode
         self.phone = phone
-        self.password = password
+        self.password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
         self.role = role
 
     def verify_password(self, password):
-        return self.password == password
+        return bcrypt.checkpw(password.encode('utf-8'), self.password)
 
     def get_2fa_uri(self):
         return str(pyotp.totp.TOTP(self.pin_key).provisioning_uri(name=self.email, issuer_name='Lottery App'))
