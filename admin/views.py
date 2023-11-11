@@ -2,11 +2,12 @@
 import random
 
 from flask import Blueprint, render_template, flash, redirect, url_for
-from flask_login import login_required
+from flask_login import login_required, current_user
 
 from app import db
 from app import requires_roles
 from models import User, Draw
+from users.forms import RegisterForm
 
 # CONFIG
 admin_blueprint = Blueprint('admin', __name__, template_folder='templates')
@@ -18,7 +19,7 @@ admin_blueprint = Blueprint('admin', __name__, template_folder='templates')
 @login_required
 @requires_roles('admin')
 def admin():
-    return render_template('admin/admin.html', name="PLACEHOLDER FOR FIRSTNAME")
+    return render_template('admin/admin.html', name=current_user.firstname)
 
 
 # create a new winning draw
@@ -48,7 +49,8 @@ def generate_winning_draw():
     winning_numbers_string = winning_numbers_string[:-1]
 
     # create a new draw object.
-    new_winning_draw = Draw(user_id=0, numbers=winning_numbers_string, master_draw=True, lottery_round=lottery_round)
+    new_winning_draw = Draw(user_id=current_user.id, numbers=winning_numbers_string, master_draw=True,
+                            lottery_round=lottery_round)
 
     # add the new winning draw to the database
     db.session.add(new_winning_draw)
@@ -70,7 +72,7 @@ def view_winning_draw():
     # if a winning draw exists
     if current_winning_draw:
         # re-render admin page with current winning draw and lottery round
-        return render_template('admin/admin.html', winning_draw=current_winning_draw, name="PLACEHOLDER FOR FIRSTNAME")
+        return render_template('admin/admin.html', winning_draw=current_winning_draw, name=current_user.firstname)
 
     # if no winning draw exists, rerender admin page
     flash("No valid winning draw exists. Please add new winning draw.")
@@ -159,3 +161,41 @@ def logs():
         content.reverse()
 
     return render_template('admin/admin.html', logs=content, name="PLACEHOLDER FOR FIRSTNAME")
+
+
+@admin_blueprint.route('/register_new_admin', methods=['GET', 'POST'])
+@login_required
+@requires_roles('admin')
+def register_new_admin():
+    form = RegisterForm()
+
+    validation_message = ''
+
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        # if this returns a user, then the email already exists in database
+
+        # if email already exists redirect user back to signup page with error message so user can try again
+        if user:
+            flash('Email address already exists')
+            return render_template('users/register.html', form=form)
+
+        # create a new user with the form data
+        new_user = User(email=form.email.data,
+                        firstname=form.firstname.data,
+                        lastname=form.lastname.data,
+                        date_of_birth=form.date_of_birth.data,
+                        postcode=form.postcode.data,
+                        phone=form.phone.data,
+                        password=form.password.data,
+                        role='admin')
+
+        # add the new user to the database
+        db.session.add(new_user)
+        db.session.commit()
+
+        flash('New admin registered successfully.')
+
+        return redirect(url_for('admin.admin'))
+
+    return render_template('users/register.html', form=form, validation_message=validation_message)
