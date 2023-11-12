@@ -84,7 +84,7 @@ def login():
     if not session.get('authentication_attempts'):
         session['authentication_attempts'] = 0
 
-    if session['authentication_attempts'] >= 3:
+    if session['authentication_attempts'] == 2:  # 3 attempts
         flash(Markup('Too many authentication attempts. Please click <a href="/reset">here</a> to reset'), 'danger')
         return render_template('users/login.html')
 
@@ -98,6 +98,8 @@ def login():
             validation_message = 'Username or password is incorrect'
             logging.warning('SECURITY - User login failed. Attempted username: [%s,%s]', form.email.data,
                             request.remote_addr)
+            attempts_remaining = 3 - session['authentication_attempts']
+            flash(f'You have {attempts_remaining} attempts remaining', 'info')
             return render_template('users/login.html', form=form, validation_message=validation_message)
 
         if not User.verify_password(username, password):
@@ -105,6 +107,8 @@ def login():
             validation_message = 'Username or password is incorrect'
             logging.warning('SECURITY - User login failed. Attempted username: [%s,%s]', form.email.data,
                             request.remote_addr)
+            attempts_remaining = 3 - session['authentication_attempts']
+            flash(f'You have {attempts_remaining} attempts remaining', 'info')
             return render_template('users/login.html', form=form, validation_message=validation_message)
 
         if not username.verify_pin(pin):
@@ -112,6 +116,8 @@ def login():
             validation_message = 'PIN or postcode is incorrect'
             logging.warning('SECURITY - User login failed. Attempted username: [%s,%s]', form.email.data,
                             request.remote_addr)
+            attempts_remaining = 3 - session['authentication_attempts']
+            flash(f'You have {attempts_remaining} attempts remaining', 'info')
             return render_template('users/login.html', form=form, validation_message=validation_message)
 
         if not username.verify_postcode(form.postcode.data):
@@ -119,11 +125,15 @@ def login():
             validation_message = 'PIN or postcode is incorrect'
             return render_template('users/login.html', form=form, validation_message=validation_message)
 
+        session['authentication_attempts'] = 0
         login_user(username)
 
         # previous log in set to current and current set to now
         username.last_login = username.current_login
         username.current_login = datetime.now()
+        username.total_logins += 1
+        username.current_login_ip = request.remote_addr
+        username.last_login_ip = username.current_login_ip
         db.session.commit()
 
         logging.warning('SECURITY - User logged in [%s, %s, %s]', current_user.id, current_user.email,
@@ -133,9 +143,6 @@ def login():
             return redirect(url_for('admin.admin'))
         else:
             return redirect(url_for('lottery.lottery'))
-
-    attempts_remaining = 3 - session['authentication_attempts']
-    flash(f'You have {attempts_remaining} attempts remaining', 'info')
 
     return render_template('users/login.html', form=form, validation_message=validation_message)
 
@@ -155,7 +162,7 @@ def logout():
         logging.warning('SECURITY - User logged out [%s, %s, %s]', current_user.id, current_user.email,
                         request.remote_addr)
         logout_user()
-        
+
     return render_template('main/index.html')
 
 
