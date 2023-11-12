@@ -58,9 +58,9 @@ def postcode_validation(form, field):
     """Checks postcode in correct format"""
     pattern1 = r'^[A-Z][0-9] [0-9][A-Z][A-Z]$'  # XYY YXX
     pattern2 = r'^[A-Z][0-9][0-9] [0-9][A-Z][A-Z]$'  # XYY YXX
-    pattern3 = r'^[A-Z][A-Z][0-9] [0-9][A-Z][A-Z]$'  # XYY YXX
+    pattern3 = r'^[A-Z][A-Z][0-9] [0-9][A-Z][A-Z]$'  # XXY YXX
 
     if not re.search(pattern1, field.data) and not re.search(pattern2, field.data) and not re.search(pattern3,
                                                                                                      field.data):
         raise ValidationError(
-            "Postcode must be in format: XYY YXX, XYY YXX or XYY YXX (X = uppercase letter, Y = number)")
+            "Postcode must be in format: XYY YXX, XYY YXX or XXY YXX (X = uppercase letter, Y = number)")
