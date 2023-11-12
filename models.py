@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import bcrypt
 import pyotp
 from flask_login import UserMixin
@@ -23,6 +25,11 @@ class User(db.Model, UserMixin):
     phone = db.Column(db.String(100), nullable=False)
     role = db.Column(db.String(100), nullable=False, default='user')
 
+    # Log Information
+    registered_on = db.Column(db.DateTime, nullable=False)
+    current_login = db.Column(db.DateTime, nullable=True)
+    last_login = db.Column(db.DateTime, nullable=True)
+
     # Define the relationship to Draw
     draws = db.relationship('Draw')
 
@@ -35,6 +42,9 @@ class User(db.Model, UserMixin):
         self.phone = phone
         self.password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
         self.role = role
+        self.registered_on = datetime.now()
+        self.current_login = None
+        self.last_login = None
 
     def verify_password(self, password):
         return bcrypt.checkpw(password.encode('utf-8'), self.password)
