@@ -1,5 +1,6 @@
 # IMPORTS
 import logging
+from datetime import datetime
 
 from flask import Blueprint, render_template, flash, redirect, url_for, session, request
 from flask_login import login_user, current_user, logout_user, login_required
@@ -113,6 +114,14 @@ def login():
             return render_template('users/login.html', form=form, validation_message=validation_message)
 
         login_user(username)
+
+        # previous log in set to current and current set to now
+        username.last_login = username.current_login
+        username.current_login = datetime.now()
+        db.session.commit()
+
+        logging.warning('SECURITY - User logged in [%s, %s, %s]', current_user.id, current_user.email,
+                        request.remote_addr)
 
         if current_user.role == 'admin':
             return redirect(url_for('admin.admin'))
