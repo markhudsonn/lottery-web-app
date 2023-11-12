@@ -29,6 +29,9 @@ class User(db.Model, UserMixin):
     registered_on = db.Column(db.DateTime, nullable=False)
     current_login = db.Column(db.DateTime, nullable=True)
     last_login = db.Column(db.DateTime, nullable=True)
+    current_login_ip = db.Column(db.String(100), nullable=True)
+    last_login_ip = db.Column(db.String(100), nullable=True)
+    total_logins = db.Column(db.Integer, nullable=False, default=0)
 
     # Define the relationship to Draw
     draws = db.relationship('Draw')
@@ -45,6 +48,9 @@ class User(db.Model, UserMixin):
         self.registered_on = datetime.now()
         self.current_login = None
         self.last_login = None
+        self.current_login_ip = None
+        self.last_login_ip = None
+        self.total_logins = 0
 
     def verify_password(self, password):
         return bcrypt.checkpw(password.encode('utf-8'), self.password)

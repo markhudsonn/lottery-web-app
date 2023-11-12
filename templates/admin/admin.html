@@ -132,7 +132,10 @@
                             <th>Email</th>
                             <th>Registered On</th>
                             <th>Current Login</th>
+                            <th>Current Login IP</th>
                             <th>Previous Login</th>
+                            <th>Previous Login IP</th>
+                            <th>Total Logins</th>
                         </tr>
                         {% for user in current_user_activity %}
                             <tr>
@@ -140,7 +143,10 @@
                                 <td>{{ user.email }}</td>
                                 <td>{{ user.registered_on }}</td>
                                 <td>{{ user.current_login }}</td>
+                                <td>{{ user.current_login_ip }}</td>
                                 <td>{{ user.last_login }}</td>
+                                <td>{{ user.last_login_ip }}</td>
+                                <td>{{ user.total_logins }}</td>
                             </tr>
                         {% endfor %}
                     </table>
