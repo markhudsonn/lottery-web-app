@@ -1,10 +1,11 @@
 # IMPORTS
 from flask import Blueprint, render_template, flash, redirect, url_for
 from flask_login import login_required, current_user
+from sqlalchemy.orm import make_transient
 
 from app import db, requires_roles
 from lottery.forms import DrawForm
-from models import Draw
+from models import Draw, encrypt
 
 # CONFIG
 lottery_blueprint = Blueprint('lottery', __name__, template_folder='templates')
@@ -33,8 +34,11 @@ def create_draw():
                              + str(form.number4.data) + ' '
                              + str(form.number5.data) + ' '
                              + str(form.number6.data))
+        # encrypt submitted numbers with user's draw key
+        submitted_numbers_encrypted = encrypt(submitted_numbers, current_user.draw_key)
         # create a new draw with the form data.
-        new_draw = Draw(user_id=current_user.id, numbers=submitted_numbers, master_draw=False, lottery_round=0)
+        new_draw = Draw(user_id=current_user.id, numbers=submitted_numbers_encrypted, master_draw=False,
+                        lottery_round=0)
         # add the new draw to the database
         db.session.add(new_draw)
         db.session.commit()
@@ -56,6 +60,11 @@ def view_draws():
 
     # if playable draws exist
     if len(playable_draws) != 0:
+        # decrypt draws
+        for draw in playable_draws:
+            make_transient(draw)
+            draw.view_draw(current_user.draw_key)
+
         # re-render lottery page with playable draws
         return render_template('lottery/lottery.html', playable_draws=playable_draws)
     else:

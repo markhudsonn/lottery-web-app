@@ -10,3 +10,4 @@ Flask-login
 python-dotenv
 MarkupSafe
 bcrypt
+cryptography

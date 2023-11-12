@@ -2,6 +2,7 @@ from datetime import datetime
 
 import bcrypt
 import pyotp
+from cryptography.fernet import Fernet
 from flask_login import UserMixin
 
 from app import db, app
@@ -33,6 +34,9 @@ class User(db.Model, UserMixin):
     last_login_ip = db.Column(db.String(100), nullable=True)
     total_logins = db.Column(db.Integer, nullable=False, default=0)
 
+    # User draw key
+    draw_key = db.Column(db.BLOB, nullable=False)
+
     # Define the relationship to Draw
     draws = db.relationship('Draw')
 
@@ -51,6 +55,7 @@ class User(db.Model, UserMixin):
         self.current_login_ip = None
         self.last_login_ip = None
         self.total_logins = 0
+        self.draw_key = Fernet.generate_key()
 
     def verify_password(self, password):
         return bcrypt.checkpw(password.encode('utf-8'), self.password)
@@ -97,6 +102,19 @@ class Draw(db.Model):
         self.master_draw = master_draw
         self.lottery_round = lottery_round
 
+    def view_draw(self, draw_key):
+        self.numbers = decrypt(self.numbers, draw_key)
+
+
+# encrypt date with symmetric key
+def encrypt(data, key):
+    return Fernet(key).encrypt(data.encode('utf-8'))
+
+
+# decrypt data with symmetric key
+def decrypt(data, key):
+    return Fernet(key).decrypt(data).decode('utf-8')
+
 
 def init_db():
     with app.app_context():
@@ -109,7 +127,8 @@ def init_db():
                      date_of_birth='01/01/2000',
                      postcode='NE1 7RU',
                      phone='0191-208-6000',
-                     role='admin')
+                     role='admin',
+                     )
 
         db.session.add(admin)
         db.session.commit()

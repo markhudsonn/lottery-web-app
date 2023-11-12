@@ -3,10 +3,11 @@ import random
 
 from flask import Blueprint, render_template, flash, redirect, url_for
 from flask_login import login_required, current_user
+from sqlalchemy.orm import make_transient
 
 from app import db
 from app import requires_roles
-from models import User, Draw
+from models import User, Draw, encrypt
 from users.forms import RegisterForm
 
 # CONFIG
@@ -48,8 +49,11 @@ def generate_winning_draw():
         winning_numbers_string += str(winning_numbers[i]) + ' '
     winning_numbers_string = winning_numbers_string[:-1]
 
+    # encrypt winning numbers with admin's draw key
+    winning_numbers_encrypted = encrypt(winning_numbers_string, current_user.draw_key)
+
     # create a new draw object.
-    new_winning_draw = Draw(user_id=current_user.id, numbers=winning_numbers_string, master_draw=True,
+    new_winning_draw = Draw(user_id=current_user.id, numbers=winning_numbers_encrypted, master_draw=True,
                             lottery_round=lottery_round)
 
     # add the new winning draw to the database
@@ -71,6 +75,9 @@ def view_winning_draw():
 
     # if a winning draw exists
     if current_winning_draw:
+        # decrypt winning numbers
+        make_transient(current_winning_draw)
+        current_winning_draw.view_draw(current_user.draw_key)
         # re-render admin page with current winning draw and lottery round
         return render_template('admin/admin.html', winning_draw=current_winning_draw, name=current_user.firstname)
 
@@ -86,6 +93,7 @@ def view_winning_draw():
 def run_lottery():
     # get current unplayed winning draw
     current_winning_draw = Draw.query.filter_by(master_draw=True, been_played=False).first()
+    winning_draw_owner = User.query.filter_by(id=current_winning_draw.user_id).first()
 
     # if current unplayed winning draw exists
     if current_winning_draw:
@@ -102,11 +110,21 @@ def run_lottery():
             db.session.add(current_winning_draw)
             db.session.commit()
 
+            # decrypt winning numbers
+            # no make_transient() required as can store draw as string in the database
+            current_winning_draw.view_draw(current_user.draw_key)
+
             # for each unplayed user draw
             for draw in user_draws:
 
                 # get the owning user (instance/object)
                 user = User.query.filter_by(id=draw.user_id).first()
+
+                # decrypt draw numbers
+                # no make_transient() required as can store draw as string in the database
+                draw.view_draw(user.draw_key)
+                print(draw.numbers)
+                print(current_winning_draw.numbers)
 
                 # if user draw matches current unplayed winning draw
                 if draw.numbers == current_winning_draw.numbers:
