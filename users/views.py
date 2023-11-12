@@ -96,16 +96,22 @@ def login():
         if not username:
             session['authentication_attempts'] += 1
             validation_message = 'Username or password is incorrect'
+            logging.warning('SECURITY - User login failed. Attempted username: [%s,%s]', form.email.data,
+                            request.remote_addr)
             return render_template('users/login.html', form=form, validation_message=validation_message)
 
         if not User.verify_password(username, password):
             session['authentication_attempts'] += 1
             validation_message = 'Username or password is incorrect'
+            logging.warning('SECURITY - User login failed. Attempted username: [%s,%s]', form.email.data,
+                            request.remote_addr)
             return render_template('users/login.html', form=form, validation_message=validation_message)
 
         if not username.verify_pin(pin):
             session['authentication_attempts'] += 1
             validation_message = 'PIN or postcode is incorrect'
+            logging.warning('SECURITY - User login failed. Attempted username: [%s,%s]', form.email.data,
+                            request.remote_addr)
             return render_template('users/login.html', form=form, validation_message=validation_message)
 
         if not username.verify_postcode(form.postcode.data):
@@ -146,7 +152,10 @@ def reset():
 @login_required
 def logout():
     if current_user.is_authenticated:
+        logging.warning('SECURITY - User logged out [%s, %s, %s]', current_user.id, current_user.email,
+                        request.remote_addr)
         logout_user()
+        
     return render_template('main/index.html')
 
 
