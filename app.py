@@ -4,7 +4,7 @@ import os
 from functools import wraps
 
 from dotenv import load_dotenv
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from flask_login import LoginManager, current_user
 from flask_qrcode import QRcode
 from flask_sqlalchemy import SQLAlchemy
@@ -49,6 +49,8 @@ def requires_roles(*roles):
         @wraps(f)
         def wrapped(*args, **kwargs):
             if current_user.role not in roles:
+                logging.warning('SECURITY - User attempted to access page with incorrect role [%s, %s, %s, %s]',
+                                current_user.id, current_user.username, current_user.role, request.remote_addr)
                 return render_template('errors/403.html'), 403
 
             return f(*args, **kwargs)
