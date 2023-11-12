@@ -61,8 +61,6 @@
         </div>
     </div>
     <div class="column is-10 is-offset-1">
-
-
         <h4 class="title is-4">Current Users</h4>
         <div class="box">
             {% if current_users %}
@@ -123,17 +121,48 @@
             </form>
             </div>
         </div>
-        <div class="column is-8 is-offset-2" id="test">
-            <h4 class="title is-4">Admin Accounts</h4>
+        <div class="column is-8 is-offset-2">
+            <h4 class="title is-4">User Activity Logs</h4>
             <div class="box">
-                <form action="/register_new_admin">
+                {% if current_user_activity %}
+                    <div class="field">
+                    <table class="table">
+                        <tr>
+                            <th>ID</th>
+                            <th>Email</th>
+                            <th>Registered On</th>
+                            <th>Current Login</th>
+                            <th>Previous Login</th>
+                        </tr>
+                        {% for user in current_user_activity %}
+                            <tr>
+                                <td>{{ user.id }}</td>
+                                <td>{{ user.email }}</td>
+                                <td>{{ user.registered_on }}</td>
+                                <td>{{ user.current_login }}</td>
+                                <td>{{ user.last_login }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% endif %}
+                <form action="/view_user_activity">
                     <div>
-                        <button class="button is-info is-centered">Create new admin user</button>
+                        <button class="button is-info is-centered">View User Activity</button>
                     </div>
                 </form>
-
+                </div>
             </div>
-        </div>
+            <div class="column is-8 is-offset-2" id="test">
+                <h4 class="title is-4">Admin Accounts</h4>
+                <div class="box">
+                    <form action="/register_new_admin">
+                        <div>
+                            <button class="button is-info is-centered">Create new admin user</button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
 
 
 

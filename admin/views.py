@@ -131,7 +131,7 @@ def run_lottery():
             if len(results) == 0:
                 flash("No winners.")
 
-            return render_template('admin/admin.html', results=results, name="PLACEHOLDER FOR FIRSTNAME")
+            return render_template('admin/admin.html', results=results, name=current_user.firstname)
 
         flash("No user draws entered.")
         return admin()
@@ -148,7 +148,17 @@ def run_lottery():
 def view_all_users():
     current_users = User.query.filter_by(role='user').all()
 
-    return render_template('admin/admin.html', name="PLACEHOLDER FOR FIRSTNAME", current_users=current_users)
+    return render_template('admin/admin.html', name=current_user.firstname, current_users=current_users)
+
+
+# view user activity
+@admin_blueprint.route('/view_user_activity')
+@login_required
+@requires_roles('admin')
+def view_user_activity():
+    current_user_activity = User.query.filter_by(role='user').all()
+
+    return render_template('admin/admin.html', name=current_user.firstname, current_user_activity=current_user_activity)
 
 
 # view last 10 log entries
@@ -160,7 +170,7 @@ def logs():
         content = f.read().splitlines()[-10:]
         content.reverse()
 
-    return render_template('admin/admin.html', logs=content, name="PLACEHOLDER FOR FIRSTNAME")
+    return render_template('admin/admin.html', logs=content, name=current_user.firstname)
 
 
 @admin_blueprint.route('/register_new_admin', methods=['GET', 'POST'])
