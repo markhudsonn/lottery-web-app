@@ -1,5 +1,7 @@
 # IMPORTS
-from flask import Blueprint, render_template, flash, redirect, url_for, session
+import logging
+
+from flask import Blueprint, render_template, flash, redirect, url_for, session, request
 from flask_login import login_user, current_user, logout_user, login_required
 from markupsafe import Markup
 
@@ -42,6 +44,9 @@ def register():
         # add the new user to the database
         db.session.add(new_user)
         db.session.commit()
+
+        # log registration
+        logging.warning('SECURITY - User registered [%s, %s]', form.email.data, request.remote_addr)
 
         # add user to session
         session['username'] = form.email.data
