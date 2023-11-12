@@ -75,6 +75,17 @@ def setup_2fa():
         'Cache-Control': 'no-cache, no-store, must-revalidate', 'Pragma': 'no-cache', 'Expires': '0'}
 
 
+# handle failed login attempts
+def failed_login(form, request, validation_message):
+    session['authentication_attempts'] += 1
+    logging.warning(f'SECURITY - User login failed. Attempted username: {form.email.data} [{request.remote_addr}]')
+
+    attempts_remaining = 3 - session['authentication_attempts']
+    flash(f'You have {attempts_remaining} attempts remaining', 'info')
+
+    return render_template('users/login.html', form=form, validation_message=validation_message)
+
+
 # view user login
 @users_blueprint.route('/login', methods=['GET', 'POST'])
 def login():
@@ -93,37 +104,11 @@ def login():
         password = form.password.data
         pin = form.pin.data
 
-        if not username:
-            session['authentication_attempts'] += 1
-            validation_message = 'Username or password is incorrect'
-            logging.warning('SECURITY - User login failed. Attempted username: [%s,%s]', form.email.data,
-                            request.remote_addr)
-            attempts_remaining = 3 - session['authentication_attempts']
-            flash(f'You have {attempts_remaining} attempts remaining', 'info')
-            return render_template('users/login.html', form=form, validation_message=validation_message)
+        if not username or not User.verify_password(username, password):
+            return failed_login(form, request, 'Username or password is incorrect')
 
-        if not User.verify_password(username, password):
-            session['authentication_attempts'] += 1
-            validation_message = 'Username or password is incorrect'
-            logging.warning('SECURITY - User login failed. Attempted username: [%s,%s]', form.email.data,
-                            request.remote_addr)
-            attempts_remaining = 3 - session['authentication_attempts']
-            flash(f'You have {attempts_remaining} attempts remaining', 'info')
-            return render_template('users/login.html', form=form, validation_message=validation_message)
-
-        if not username.verify_pin(pin):
-            session['authentication_attempts'] += 1
-            validation_message = 'PIN or postcode is incorrect'
-            logging.warning('SECURITY - User login failed. Attempted username: [%s,%s]', form.email.data,
-                            request.remote_addr)
-            attempts_remaining = 3 - session['authentication_attempts']
-            flash(f'You have {attempts_remaining} attempts remaining', 'info')
-            return render_template('users/login.html', form=form, validation_message=validation_message)
-
-        if not username.verify_postcode(form.postcode.data):
-            session['authentication_attempts'] += 1
-            validation_message = 'PIN or postcode is incorrect'
-            return render_template('users/login.html', form=form, validation_message=validation_message)
+        if not username.verify_pin(pin) and not username.verify_postcode(pin):
+            return failed_login(form, request, 'PIN/Postcode is incorrect')
 
         session['authentication_attempts'] = 0
         login_user(username)
