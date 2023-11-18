@@ -8,6 +8,33 @@ from flask import Flask, render_template, request
 from flask_login import LoginManager, current_user
 from flask_qrcode import QRcode
 from flask_sqlalchemy import SQLAlchemy
+from flask_talisman import Talisman
+
+csp = {
+    'default-src': [  # Whitelist content sources
+        '\'self\'',
+        'https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css'
+    ],
+    'frame-src': [  # Whitelist iframe content
+        '\'self\'',
+        'https://www.google.com/recaptcha/',
+        'https://recaptcha.google.com/recaptcha/'
+    ],
+    'script-src': [  # Allow inline scripts
+        '\'self\'',
+        '\'unsafe-inline\'',
+        'https://www.google.com/recaptcha/',
+        'https://www.gstatic.com/recaptcha/',
+    ],
+    'img-src': [  # Allow images
+        'data:',
+    ],
+    'style-src': [  # Allow styles
+        '\'self\'',
+        '\'unsafe-inline\'',
+        'https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css'
+    ],
+}
 
 
 class SecurityFilter(logging.Filter):
@@ -35,6 +62,7 @@ app.config['RECAPTCHA_PRIVATE_KEY'] = os.getenv('RECAPTCHA_PRIVATE_KEY')
 
 # initialise database
 db = SQLAlchemy(app)
+talisman = Talisman(app, content_security_policy=csp)
 QRcode(app)
 
 

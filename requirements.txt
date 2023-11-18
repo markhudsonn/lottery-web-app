@@ -11,3 +11,4 @@ python-dotenv
 MarkupSafe
 bcrypt
 cryptography
+Flask-Talisman
