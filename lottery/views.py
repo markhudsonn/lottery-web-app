@@ -28,14 +28,16 @@ def create_draw():
     form = DrawForm()
 
     if form.validate_on_submit():
-        submitted_numbers = (str(form.number1.data) + ' '
-                             + str(form.number2.data) + ' '
-                             + str(form.number3.data) + ' '
-                             + str(form.number4.data) + ' '
-                             + str(form.number5.data) + ' '
-                             + str(form.number6.data))
+        # sort in ascending order
+        sorted_submitted_numbers = sorted([form.number1.data, form.number2.data, form.number3.data,
+                                           form.number4.data, form.number5.data, form.number6.data])
+        # convert to string
+        submitted_numbers_string = ''
+        for number in sorted_submitted_numbers:
+            submitted_numbers_string += str(number) + ' '
+
         # encrypt submitted numbers with user's draw key
-        submitted_numbers_encrypted = encrypt(submitted_numbers, current_user.draw_key)
+        submitted_numbers_encrypted = encrypt(submitted_numbers_string, current_user.draw_key)
         # create a new draw with the form data.
         new_draw = Draw(user_id=current_user.id, numbers=submitted_numbers_encrypted, master_draw=False,
                         lottery_round=0)
@@ -44,7 +46,7 @@ def create_draw():
         db.session.commit()
 
         # re-render lottery.page
-        flash('Draw %s submitted.' % submitted_numbers)
+        flash('Draw %s submitted.' % submitted_numbers_string)
         return redirect(url_for('lottery.lottery'))
 
     return render_template('lottery/lottery.html', name=current_user.firstname, form=form)
