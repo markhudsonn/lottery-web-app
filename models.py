@@ -126,7 +126,7 @@ def init_db():
                      lastname='Jones',
                      date_of_birth='01/01/2000',
                      postcode='NE1 7RU',
-                     phone='0191-208-6000',
+                     phone='1234-123-1234',
                      role='admin',
                      )
 

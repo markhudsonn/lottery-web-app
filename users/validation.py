@@ -10,7 +10,7 @@ def name_special_character_validation(form, field):
 
 
 def phone_number_validation(form, field):
-    """"Checks if phone number in correct format"""
+    """"Checks if phone number in format XXXX-XXX-XXXX"""
     if not re.search(r'^\d{4}-\d{3}-\d{4}$', field.data):
         raise ValidationError("Phone number must be in format: XXXX-XXX-XXXX")
 

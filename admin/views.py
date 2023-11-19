@@ -169,7 +169,6 @@ def view_all_users():
     return render_template('admin/admin.html', name=current_user.firstname, current_users=current_users)
 
 
-# view user activity
 @admin_blueprint.route('/view_user_activity')
 @login_required
 @requires_roles('admin')
@@ -201,7 +200,7 @@ def register_new_admin():
 
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
-        # if this returns a user, then the email already exists in database
+        # if this returns a user, email already exists in database
 
         # if email already exists redirect user back to signup page with error message so user can try again
         if user:

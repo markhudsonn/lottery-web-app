@@ -92,6 +92,7 @@ def login():
     form = LoginForm()
     validation_message = ""
 
+    # store authentication attempts in flask session
     if not session.get('authentication_attempts'):
         session['authentication_attempts'] = 0
 
@@ -110,10 +111,10 @@ def login():
         if not username.verify_pin(pin) and not username.verify_postcode(pin):
             return failed_login(form, request, 'PIN/Postcode is incorrect')
 
-        session['authentication_attempts'] = 0
-        login_user(username)
+        session['authentication_attempts'] = 0  # reset attempts if successful login
+        login_user(username)  # Add user to session
 
-        # previous log in set to current and current set to now
+        # update database log information
         username.last_login = username.current_login
         username.current_login = datetime.now()
         username.total_logins += 1

@@ -10,7 +10,7 @@ from flask_qrcode import QRcode
 from flask_sqlalchemy import SQLAlchemy
 from flask_talisman import Talisman
 
-csp = {
+csp = {  # Content Security Policy
     'default-src': [  # Whitelist content sources
         '\'self\'',
         'https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css'
@@ -50,8 +50,8 @@ formatter = logging.Formatter('%(asctime)s : %(message)s', '%m/%d/%Y %I:%M:%S %p
 file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 
-load_dotenv()
 # CONFIG
+load_dotenv()
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
@@ -72,7 +72,7 @@ def index():
     return render_template('main/index.html')
 
 
-def requires_roles(*roles):
+def requires_roles(*roles):  # Create custom wrapper for roles
     def wrapper(f):
         @wraps(f)
         def wrapped(*args, **kwargs):
@@ -96,8 +96,7 @@ from admin.views import admin_blueprint
 from lottery.views import lottery_blueprint
 from errors.views import errors_blueprint
 
-#
-# # register blueprints with app
+# register blueprints with app
 app.register_blueprint(users_blueprint)
 app.register_blueprint(admin_blueprint)
 app.register_blueprint(lottery_blueprint)
@@ -117,4 +116,4 @@ def load_user(user_id):
 
 
 if __name__ == "__main__":
-    app.run(ssl_context=('cert.pem', 'key.pem'))
+    app.run(ssl_context=('cert.pem', 'key.pem'))  # Run with SSL
