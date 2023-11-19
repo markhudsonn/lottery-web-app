@@ -1,5 +1,5 @@
 # IMPORTS
-import random
+import secrets
 
 from flask import Blueprint, render_template, flash, redirect, url_for
 from flask_login import login_required, current_user
@@ -42,7 +42,15 @@ def generate_winning_draw():
         db.session.commit()
 
     # get new winning numbers for draw
-    winning_numbers = random.sample(range(1, 60), 6)
+    # winning_numbers = random.sample(range(1, 60), 6)
+
+    # Cryptographically secure random number generator for 6 unique numbers between 1 and 60
+    winning_numbers = []
+    while len(winning_numbers) < 6:
+        random_number = secrets.randbelow(60) + 1
+        if random_number not in winning_numbers:
+            winning_numbers.append(random_number)
+            
     winning_numbers.sort()
     winning_numbers_string = ''
     for i in range(6):
