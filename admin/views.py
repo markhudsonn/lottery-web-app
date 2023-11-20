@@ -112,7 +112,6 @@ def view_winning_draw():
 def run_lottery():
     # get current unplayed winning draw
     current_winning_draw = Draw.query.filter_by(master_draw=True, been_played=False).first()
-    winning_draw_owner = User.query.filter_by(id=current_winning_draw.user_id).first()
 
     # if current unplayed winning draw exists
     if current_winning_draw:
@@ -137,7 +136,7 @@ def run_lottery():
 
             # Asymmetric
             current_winning_draw.view_draw(current_user.private_draw_key)
-            
+
             # for each unplayed user draw
             for draw in user_draws:
 
@@ -179,7 +178,7 @@ def run_lottery():
             return render_template('admin/admin.html', results=results, name=current_user.firstname)
 
         flash("No user draws entered.")
-        return admin()
+        return redirect(url_for('admin.admin'))
 
     # if current unplayed winning draw does not exist
     flash("Current winning draw expired. Add new winning draw for next round.")
