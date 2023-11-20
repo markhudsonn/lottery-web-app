@@ -31,10 +31,9 @@ def create_draw():
         # sort in ascending order
         sorted_submitted_numbers = sorted([form.number1.data, form.number2.data, form.number3.data,
                                            form.number4.data, form.number5.data, form.number6.data])
+        
         # convert to string
-        submitted_numbers_string = ''
-        for number in sorted_submitted_numbers:
-            submitted_numbers_string += str(number) + ' '
+        submitted_numbers_string = ' '.join([str(number) for number in sorted_submitted_numbers])
 
         # encrypt submitted numbers with user's draw key
 
