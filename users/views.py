@@ -103,12 +103,13 @@ def login():
     if form.validate_on_submit():
         username = User.query.filter_by(email=form.email.data).first()
         password = form.password.data
+        postcode = form.postcode.data
         pin = form.pin.data
 
         if not username or not User.verify_password(username, password):
             return failed_login(form, request, 'Username or password is incorrect')
 
-        if not username.verify_pin(pin) and not username.verify_postcode(pin):
+        if not username.verify_pin(pin) or not username.verify_postcode(postcode):
             return failed_login(form, request, 'PIN/Postcode is incorrect')
 
         session['authentication_attempts'] = 0  # reset attempts if successful login
