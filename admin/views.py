@@ -41,7 +41,7 @@ def generate_winning_draw():
         db.session.delete(current_winning_draw)
         db.session.commit()
 
-    # get new winning numbers for draw
+    # get new winning numbers for draw (pseudo-random)
     # winning_numbers = random.sample(range(1, 60), 6)
 
     # Cryptographically secure random number generator for 6 unique numbers between 1 and 60
@@ -50,7 +50,7 @@ def generate_winning_draw():
         random_number = secrets.randbelow(60) + 1
         if random_number not in winning_numbers:
             winning_numbers.append(random_number)
-            
+
     winning_numbers.sort()
     winning_numbers_string = ''
     for i in range(6):
@@ -58,7 +58,12 @@ def generate_winning_draw():
     winning_numbers_string = winning_numbers_string[:-1]
 
     # encrypt winning numbers with admin's draw key
-    winning_numbers_encrypted = encrypt(winning_numbers_string, current_user.draw_key)
+
+    # Symmetric
+    # winning_numbers_encrypted = encrypt(winning_numbers_string, current_user.draw_key)
+
+    # Asymmetric
+    winning_numbers_encrypted = encrypt(winning_numbers_string, current_user.public_draw_key)
 
     # create a new draw object.
     new_winning_draw = Draw(user_id=current_user.id, numbers=winning_numbers_encrypted, master_draw=True,
@@ -85,7 +90,13 @@ def view_winning_draw():
     if current_winning_draw:
         # decrypt winning numbers
         make_transient(current_winning_draw)
-        current_winning_draw.view_draw(current_user.draw_key)
+
+        # Symmetric
+        # current_winning_draw.view_draw(current_user.draw_key)
+
+        # Asymmetric
+        current_winning_draw.view_draw(current_user.private_draw_key)
+
         # re-render admin page with current winning draw and lottery round
         return render_template('admin/admin.html', winning_draw=current_winning_draw, name=current_user.firstname)
 
@@ -120,8 +131,13 @@ def run_lottery():
 
             # decrypt winning numbers
             # no make_transient() required as can store draw as string in the database
-            current_winning_draw.view_draw(current_user.draw_key)
 
+            # Symmetric
+            # current_winning_draw.view_draw(current_user.draw_key)
+
+            # Asymmetric
+            current_winning_draw.view_draw(current_user.private_draw_key)
+            
             # for each unplayed user draw
             for draw in user_draws:
 
@@ -130,9 +146,12 @@ def run_lottery():
 
                 # decrypt draw numbers
                 # no make_transient() required as can store draw as string in the database
-                draw.view_draw(user.draw_key)
-                print(draw.numbers)
-                print(current_winning_draw.numbers)
+
+                # Symmetric
+                # draw.view_draw(user.draw_key)
+
+                # Asymmetric
+                draw.view_draw(user.private_draw_key)
 
                 # if user draw matches current unplayed winning draw
                 if draw.numbers == current_winning_draw.numbers:

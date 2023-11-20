@@ -37,7 +37,13 @@ def create_draw():
             submitted_numbers_string += str(number) + ' '
 
         # encrypt submitted numbers with user's draw key
-        submitted_numbers_encrypted = encrypt(submitted_numbers_string, current_user.draw_key)
+
+        # Symmetric
+        # submitted_numbers_encrypted = encrypt(submitted_numbers_string, current_user.draw_key)
+
+        # Asymmetric
+        submitted_numbers_encrypted = encrypt(submitted_numbers_string, current_user.public_draw_key)
+
         # create a new draw with the form data.
         new_draw = Draw(user_id=current_user.id, numbers=submitted_numbers_encrypted, master_draw=False,
                         lottery_round=0)
@@ -65,7 +71,12 @@ def view_draws():
         # decrypt draws
         for draw in playable_draws:
             make_transient(draw)
-            draw.view_draw(current_user.draw_key)
+
+            # Symmetric
+            # draw.view_draw(current_user.draw_key)
+
+            # Asymmetric
+            draw.view_draw(current_user.private_draw_key)
 
         # re-render lottery page with playable draws
         return render_template('lottery/lottery.html', playable_draws=playable_draws)
@@ -79,7 +90,7 @@ def view_draws():
 @requires_roles('user')
 @lottery_blueprint.route('/check_draws', methods=['POST'])
 def check_draws():
-    # get played draws by current user
+    # get played draws by current user, don't need to decrypt as played draws already decrypted
     played_draws = Draw.query.filter_by(been_played=True, user_id=current_user.id).all()
 
     # if played draws exist

@@ -12,3 +12,4 @@ MarkupSafe
 bcrypt
 cryptography
 Flask-Talisman
+rsa

@@ -1,8 +1,9 @@
+import pickle
 from datetime import datetime
 
 import bcrypt
 import pyotp
-from cryptography.fernet import Fernet
+import rsa
 from flask_login import UserMixin
 
 from app import db, app
@@ -34,8 +35,12 @@ class User(db.Model, UserMixin):
     last_login_ip = db.Column(db.String(100), nullable=True)
     total_logins = db.Column(db.Integer, nullable=False, default=0)
 
-    # User draw key
-    draw_key = db.Column(db.BLOB, nullable=False)
+    # Symmetric key
+    # draw_key = db.Column(db.BLOB, nullable=False)
+
+    # Asymmetric keys
+    public_draw_key = db.Column(db.BLOB, nullable=False)
+    private_draw_key = db.Column(db.BLOB, nullable=False)
 
     # Define the relationship to Draw
     draws = db.relationship('Draw')
@@ -55,7 +60,14 @@ class User(db.Model, UserMixin):
         self.current_login_ip = None
         self.last_login_ip = None
         self.total_logins = 0
-        self.draw_key = Fernet.generate_key()
+
+        # Symmetric key
+        # self.draw_key = Fernet.generate_key()
+
+        # Asymmetric keys
+        public_key, private_key = rsa.newkeys(512)
+        self.public_draw_key = pickle.dumps(public_key)
+        self.private_draw_key = pickle.dumps(private_key)
 
     def verify_password(self, password):
         return bcrypt.checkpw(password.encode('utf-8'), self.password)
@@ -102,18 +114,35 @@ class Draw(db.Model):
         self.master_draw = master_draw
         self.lottery_round = lottery_round
 
-    def view_draw(self, draw_key):
-        self.numbers = decrypt(self.numbers, draw_key)
+    # view draw with symmetric key
+    # def view_draw(self, draw_key):
+    #     self.numbers = decrypt(self.numbers, draw_key)
+
+    # view draw with asymmetric key
+    def view_draw(self, private_key):
+        private_key = pickle.loads(private_key)
+        self.numbers = rsa.decrypt(self.numbers, private_key).decode('utf-8')
 
 
 # encrypt date with symmetric key
-def encrypt(data, key):
-    return Fernet(key).encrypt(data.encode('utf-8'))
+# def encrypt(data, key):
+#     return Fernet(key).encrypt(data.encode('utf-8'))
 
 
 # decrypt data with symmetric key
-def decrypt(data, key):
-    return Fernet(key).decrypt(data).decode('utf-8')
+# def decrypt(data, key):
+#     return Fernet(key).decrypt(data).decode('utf-8')
+
+# encrypt data with asymmetric key
+def encrypt(data, public_key):
+    public_key = pickle.loads(public_key)
+    return rsa.encrypt(data.encode('utf-8'), public_key)
+
+
+# decrypt data with asymmetric key
+def decrypt(data, private_key):
+    private_key = pickle.loads(private_key)
+    return rsa.decrypt(data, private_key).decode('utf-8')
 
 
 def init_db():
