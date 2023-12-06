@@ -116,4 +116,6 @@ def load_user(user_id):
 
 
 if __name__ == "__main__":
-    app.run(ssl_context=('cert.pem', 'key.pem'))  # Run with SSL
+    # app.run(ssl_context=('cert.pem', 'key.pem'))  # Run with SSL
+    # Run with additional options: --cert=cert.pem --key=key.pem
+    app.run()
