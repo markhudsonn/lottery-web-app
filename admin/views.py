@@ -1,7 +1,8 @@
 # IMPORTS
+import logging
 import secrets
 
-from flask import Blueprint, render_template, flash, redirect, url_for
+from flask import Blueprint, render_template, flash, redirect, url_for, request
 from flask_login import login_required, current_user
 from sqlalchemy.orm import make_transient
 
@@ -248,6 +249,8 @@ def register_new_admin():
         db.session.commit()
 
         flash('New admin registered successfully.')
+
+        logging.warning('SECURITY - New admin registered [%s, %s]', form.email.data, request.remote_addr)
 
         return redirect(url_for('admin.admin'))
 
