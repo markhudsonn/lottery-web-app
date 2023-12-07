@@ -81,6 +81,9 @@ class User(db.Model, UserMixin):
     def verify_postcode(self, postcode):
         return self.postcode == postcode
 
+    def change_password(self, new_password):
+        self.password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt())
+
 
 class Draw(db.Model):
     __tablename__ = 'draws'
