@@ -6,7 +6,7 @@ from flask import Blueprint, render_template, flash, redirect, url_for, session,
 from flask_login import login_user, current_user, logout_user, login_required
 from markupsafe import Markup
 
-from app import db
+from app import db, anonymous_required
 from models import User
 from users.forms import RegisterForm, LoginForm, ChangePasswordForm
 
@@ -17,6 +17,7 @@ users_blueprint = Blueprint('users', __name__, template_folder='templates')
 # VIEWS
 # view registration
 @users_blueprint.route('/register', methods=['GET', 'POST'])
+@anonymous_required
 def register():
     # create signup form object
     form = RegisterForm()
@@ -60,6 +61,7 @@ def register():
 
 # view 2fa setup
 @users_blueprint.route('/setup_2fa', methods=['GET', 'POST'])
+@anonymous_required
 def setup_2fa():
     if 'username' not in session:
         return redirect(url_for('index'))
@@ -76,6 +78,7 @@ def setup_2fa():
 
 
 # handle failed login attempts
+@anonymous_required
 def failed_login(form, request, validation_message):
     session['authentication_attempts'] += 1
     logging.warning(f'SECURITY - User login failed. Attempted username: {form.email.data} [{request.remote_addr}]')
@@ -88,6 +91,7 @@ def failed_login(form, request, validation_message):
 
 # view user login
 @users_blueprint.route('/login', methods=['GET', 'POST'])
+@anonymous_required
 def login():
     form = LoginForm()
     validation_message = ""
@@ -136,6 +140,7 @@ def login():
 
 # reset authentication attempts
 @users_blueprint.route('/reset')
+@anonymous_required
 def reset():
     session['authentication_attempts'] = 0
     return redirect(url_for('users.login'))
@@ -187,7 +192,7 @@ def change_password():
             flash('New password cannot be the same as the current password')
             return render_template('users/change_password.html', form=form, validation_message=validation_message)
 
-        current_user.password = form.new_password.data
+        current_user.change_password(form.new_password.data)
         db.session.commit()
 
         flash('Password updated successfully', 'success')

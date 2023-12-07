@@ -89,6 +89,19 @@ def requires_roles(*roles):  # Create custom wrapper for roles
     return wrapper
 
 
+def anonymous_required(f):
+    @wraps(f)
+    def wrapped(*args, **kwargs):
+        if current_user.is_authenticated:
+            logging.warning('SECURITY - User attempted to access page with invalid role[%s, %s, %s, %s]',
+                            current_user.id,
+                            current_user.email, current_user.role, request.remote_addr)
+            return render_template('errors/403.html'), 403
+        return f(*args, **kwargs)
+
+    return wrapped
+
+
 # BLUEPRINTS
 # import blueprints
 from users.views import users_blueprint
