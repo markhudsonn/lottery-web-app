@@ -19,16 +19,16 @@ class RegisterForm(FlaskForm):
     confirm_password = PasswordField('Confirm Password',
                                      validators=[DataRequired(), EqualTo('password', message='Passwords must match'),
                                                  Length(min=6, max=12)])
-    submit = SubmitField()
+    submit = SubmitField("Register")
 
 
 class LoginForm(FlaskForm):
     email = EmailField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('Password', validators=[DataRequired(), Length(min=6, max=12)])
+    password = PasswordField('Password', validators=[DataRequired()])
     postcode = StringField('Postcode', validators=[DataRequired()])
     pin = StringField('Pin', validators=[DataRequired()])
     recaptcha = RecaptchaField()
-    submit = SubmitField()
+    submit = SubmitField("Login")
 
 
 class ChangePasswordForm(FlaskForm):
