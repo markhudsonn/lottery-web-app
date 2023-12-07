@@ -35,7 +35,7 @@ def password_uppercase_validation(form, field):
 
 def password_special_character_validation(form, field):
     """Checks password has at least 1 special character"""
-    if not re.search(r'[*?!\'^+%&/()=}\]\[{$#@<>]', field.data):
+    if not re.search(r'[^A-Za-z0-9]', field.data):
         raise ValidationError("Password must contain at least 1 special character")
 
 
