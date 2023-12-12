@@ -94,7 +94,7 @@ class Draw(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey(User.id), nullable=False)
 
     # 6 draw numbers submitted
-    numbers = db.Column(db.String(100), nullable=False)
+    numbers = db.Column(db.String(256), nullable=False)
 
     # Draw has already been played (can only play draw once)
     been_played = db.Column(db.BOOLEAN, nullable=False, default=False)
